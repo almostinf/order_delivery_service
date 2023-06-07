@@ -1,0 +1,455 @@
+basePath: /v1
+definitions:
+  entity.CourierAssignment:
+    properties:
+      courier_id:
+        type: string
+      orders:
+        items:
+          $ref: '#/definitions/entity.OrdersGroup'
+        type: array
+    required:
+    - courier_id
+    - orders
+    type: object
+  entity.CourierMetaInfo:
+    properties:
+      courier_id:
+        type: string
+      courier_type:
+        type: string
+      earnings:
+        type: integer
+      rating:
+        type: integer
+      regions:
+        items:
+          type: integer
+        type: array
+      working_hours:
+        items:
+          type: string
+        type: array
+    type: object
+  entity.CourierResponse:
+    properties:
+      courier_id:
+        type: string
+      courier_type:
+        type: string
+      regions:
+        items:
+          type: integer
+        type: array
+      working_hours:
+        items:
+          type: string
+        type: array
+    type: object
+  entity.OrderResponse:
+    properties:
+      completed_time:
+        type: string
+      cost:
+        type: integer
+      courier_id:
+        type: string
+      delivery_hours:
+        items:
+          type: string
+        type: array
+      order_id:
+        type: string
+      regions:
+        type: integer
+      weight:
+        type: number
+    type: object
+  entity.OrdersGroup:
+    properties:
+      group_order_id:
+        type: string
+      orders:
+        items:
+          $ref: '#/definitions/entity.OrderResponse'
+        type: array
+    required:
+    - group_order_id
+    - orders
+    type: object
+  v1.couriersAssignResponse:
+    properties:
+      couriers:
+        items:
+          $ref: '#/definitions/entity.CourierAssignment'
+        type: array
+      date:
+        type: string
+    type: object
+  v1.getAllCouriersResponse:
+    properties:
+      couriers:
+        items:
+          $ref: '#/definitions/entity.CourierResponse'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+    type: object
+  v1.response:
+    properties:
+      error:
+        example: message
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Order and Courier services
+  title: Order Delivery Service API
+  version: "1.0"
+paths:
+  /couriers/:
+    get:
+      description: Get All Couriers from Postgres
+      operationId: get-all-couriers
+      parameters:
+      - description: 'Limit the number of results (default: 1)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Offset the list of results (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.getAllCouriersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get All Couriers
+      tags:
+      - couriers
+    post:
+      consumes:
+      - application/json
+      description: Create Courier in Postgres
+      operationId: create-courier
+      parameters:
+      - description: Courier object
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.CourierResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Create Courier
+      tags:
+      - couriers
+  /couriers/{courier_id}:
+    get:
+      description: Get Courier by ID from Postgres
+      operationId: get-courier-by-id
+      parameters:
+      - description: Courier ID
+        in: path
+        name: courier_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.CourierResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get Courier by ID in path
+      tags:
+      - couriers
+  /couriers/assignments:
+    get:
+      description: Get Assignments of Courier from Postgres
+      operationId: get-courier-assignments
+      parameters:
+      - description: Date
+        in: query
+        name: date
+        type: string
+      - description: Courier ID
+        in: query
+        name: courier_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.couriersAssignResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get Assignments of Courier
+      tags:
+      - couriers
+  /couriers/meta-info/{courier_id}:
+    get:
+      description: Get MetaInfo about Courier from Postgres
+      operationId: get-courier-metainfo
+      parameters:
+      - description: Courier ID
+        in: path
+        name: courier_id
+        required: true
+        type: string
+      - description: Start Date
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End Date
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.CourierMetaInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get MetaInfo about Courier
+      tags:
+      - couriers
+  /orders/:
+    get:
+      description: Get All Orders from Postgres
+      operationId: get-all-orders
+      parameters:
+      - description: 'Limit the number of results (default: 1)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Offset the list of results (default: 0)'
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.OrderResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get All Orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create Order in Postgres
+      operationId: create-order
+      parameters:
+      - description: Order object
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.OrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Create Order
+      tags:
+      - orders
+  /orders/{order_id}:
+    get:
+      description: Get Order By ID from Postgres
+      operationId: get-orders-by-id
+      parameters:
+      - description: Courier ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.OrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get Order By ID
+      tags:
+      - orders
+  /orders/assign:
+    post:
+      description: Assign Order to Courier
+      operationId: assign-order
+      parameters:
+      - description: Date
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.couriersAssignResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Assign Order to Courier
+      tags:
+      - orders
+  /orders/complete:
+    post:
+      consumes:
+      - application/json
+      description: Complete Order
+      operationId: complete-order
+      parameters:
+      - description: Complete Info Order object
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.OrderResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Complete Order
+      tags:
+      - orders
+  /orders/set_courier:
+    put:
+      description: Set Courier ID to order
+      operationId: set-order-courier-id
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: string
+      - description: Courier ID
+        in: query
+        name: courier_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.OrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Set Courier ID to order
+      tags:
+      - orders
+swagger: "2.0"
