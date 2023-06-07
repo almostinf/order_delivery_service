@@ -38,6 +38,8 @@ make integration-test-docker-up
 - [Smart Imports](https://github.com/pav5000/smartimports)
 - [Golang-ci lint](https://golangci-lint.run/)
 
+**Swagger:** [swag](https://github.com/swaggo/swag)
+
 ### Licence
 **Licensed under:**
 - MIT license ([LICENSE-MIT](https://github.com/seanmonstar/httparse/blob/master/LICENSE-MIT) or [https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT))
